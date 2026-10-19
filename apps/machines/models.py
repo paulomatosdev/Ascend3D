@@ -5,38 +5,38 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 
-class Machine(models.Model):
-    class Technology(models.TextChoices):
+class Maquina(models.Model):
+    class Tipo_Impressao(models.TextChoices):
         FDM = "FDM", "FDM"
         RESINA = "RESINA", "Resina"
 
-    name = models.CharField("nome", max_length=100)
-    technology = models.CharField(
+    nome = models.CharField("nome", max_length=100)
+    tipo_impressao = models.CharField(
         "tipo de impressão",
         max_length=10,
-        choices=Technology.choices,
+        choices=Tipo_Impressao.choices,
     )
-    purchase_price = models.DecimalField(
+    preco_compra = models.DecimalField(
         "preço de compra (R$)",
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
-    resale_value = models.DecimalField(
+    valor_revenda = models.DecimalField(
         "valor de revenda (R$)",
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(Decimal("0.00"))],
     )
-    life_span_hours = models.PositiveIntegerField(
+    vida_util_horas = models.PositiveIntegerField(
         "vida útil (horas)",
         validators=[MinValueValidator(1)],
     )
-    avg_power_watts = models.PositiveIntegerField(
+    consumo_watts = models.PositiveIntegerField(
         "consumo médio (watts)",
         validators=[MinValueValidator(1)],
     )
-    maintenance_per_hour = models.DecimalField(
+    manutencao_por_hora = models.DecimalField(
         "manutenção por hora (R$)",
         max_digits=10,
         decimal_places=2,
@@ -52,21 +52,25 @@ class Machine(models.Model):
     def clean(self):
         super().clean()
         if (
-            self.purchase_price is not None
-            and self.resale_value is not None
-            and self.resale_value > self.purchase_price
+            self.preco_compra is not None
+            and self.valor_revenda is not None
+            and self.valor_revenda > self.preco_compra
         ):
             raise ValidationError(
-                {"resale_value": "O valor de revenda não pode superar o preço de compra."}
+                {"valor_revenda": "O valor de revenda não pode superar o preço de compra."}
             )
 
     def __str__(self):
-        return self.name
+        return self.nome
 
     @property
-    def depreciation_per_hour(self):
-        return (self.purchase_price - self.resale_value) / self.life_span_hours
+    def depreciacao_por_hora(self):
+        return (self.preco_compra - self.valor_revenda) / self.vida_util_horas
 
     @property
     def machine_cost_per_hour(self):
-        return self.depreciation_per_hour + self.maintenance_per_hour
+        return self.depreciacao_por_hora + self.manutencao_por_hora
+
+    @property
+    def maquina_custo_por_hora(self):
+        return self.machine_cost_per_hour

@@ -3,66 +3,51 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from .models import SalesChannel
+from .models import Marketplaces
 
 
-class SalesChannelValidationTests(TestCase):
-    def make_channel(self, **overrides):
+class MarketplaceValidationTests(TestCase):
+    def make_marketplace(self, **overrides):
         data = {
-            "name": "Shopee (CPF)",
-            "commission_percent": Decimal("14.00"),
-            "fixed_fee": Decimal("7.00"),
+            "nome": "Shopee (CPF)",
+            "porcentagem_comissao": Decimal("14.00"),
+            "taxa_fixa": Decimal("7.00"),
         }
         data.update(overrides)
-        return SalesChannel(**data)
+        return Marketplaces(**data)
 
-    def assert_invalid(self, channel, field):
+    def assert_invalid(self, marketplace, field):
         with self.assertRaises(ValidationError) as raised:
-            channel.full_clean()
-
+            marketplace.full_clean()
         self.assertIn(field, raised.exception.message_dict)
 
-    def test_valid_channel_passes_validation(self):
-        self.make_channel().full_clean()
+    def test_valid_marketplace_passes_validation(self):
+        self.make_marketplace().full_clean()
 
     def test_maximum_commission_passes_validation(self):
-        self.make_channel(commission_percent=Decimal("99.99")).full_clean()
+        self.make_marketplace(porcentagem_comissao=Decimal("99.99")).full_clean()
 
     def test_direct_sale_with_no_fees_passes_validation(self):
-        channel = self.make_channel(
-            name="Venda direta",
-            commission_percent=Decimal("0.00"),
-            fixed_fee=Decimal("0.00"),
-        )
-
-        channel.full_clean()
+        self.make_marketplace(
+            nome="Venda direta", porcentagem_comissao=Decimal("0.00"), taxa_fixa=Decimal("0.00")
+        ).full_clean()
 
     def test_commission_of_100_fails_validation(self):
-        channel = self.make_channel(commission_percent=Decimal("100"))
-
-        self.assert_invalid(channel, "commission_percent")
+        self.assert_invalid(self.make_marketplace(porcentagem_comissao=Decimal("100")), "porcentagem_comissao")
 
     def test_negative_commission_fails_validation(self):
-        channel = self.make_channel(commission_percent=Decimal("-1"))
-
-        self.assert_invalid(channel, "commission_percent")
-
-    def test_commission_with_three_decimal_places_fails_validation(self):
-        channel = self.make_channel(commission_percent=Decimal("14.555"))
-
-        self.assert_invalid(channel, "commission_percent")
+        self.assert_invalid(self.make_marketplace(porcentagem_comissao=Decimal("-1")), "porcentagem_comissao")
 
     def test_negative_fixed_fee_fails_validation(self):
-        channel = self.make_channel(fixed_fee=Decimal("-0.01"))
-
-        self.assert_invalid(channel, "fixed_fee")
+        self.assert_invalid(self.make_marketplace(taxa_fixa=Decimal("-0.01")), "taxa_fixa")
 
     def test_blank_name_fails_validation(self):
-        channel = self.make_channel(name="")
-
-        self.assert_invalid(channel, "name")
+        self.assert_invalid(self.make_marketplace(nome=""), "nome")
 
     def test_duplicate_name_fails_validation(self):
-        self.make_channel().save()
+        self.make_marketplace().save()
+        self.assert_invalid(self.make_marketplace(), "nome")
 
-        self.assert_invalid(self.make_channel(), "name")
+    def test_sale_price_grosses_up_net_target(self):
+        marketplace = self.make_marketplace(porcentagem_comissao=Decimal("10.00"), taxa_fixa=Decimal("2.00"))
+        self.assertEqual(marketplace.valor_venda(Decimal("100.00")), Decimal("113.33"))

@@ -1,10 +1,10 @@
 from django.contrib import admin
 
-from .models import SalesChannel
+from .models import Marketplaces
 
 
-@admin.register(SalesChannel)
-class SalesChannelAdmin(admin.ModelAdmin):
-    list_display = ("name", "commission_percent", "fixed_fee")
-    search_fields = ("name",)
+@admin.register(Marketplaces)
+class MarketplaceAdmin(admin.ModelAdmin):
+    list_display = ("nome", "porcentagem_comissao", "taxa_fixa")
+    search_fields = ("nome",)
     

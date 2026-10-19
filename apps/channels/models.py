@@ -1,17 +1,17 @@
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
-class SalesChannel(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    commission_percent = models.DecimalField(
+class Marketplaces(models.Model):
+    nome = models.CharField(max_length=100, unique=True)
+    porcentagem_comissao = models.DecimalField(
         max_digits=5,
         decimal_places=2,
         validators=[MinValueValidator(Decimal("0.00")), MaxValueValidator(Decimal("99.99"))],
     )
-    fixed_fee = models.DecimalField(
+    taxa_fixa = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(Decimal("0.00"))],
@@ -19,13 +19,13 @@ class SalesChannel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     @property
-    def commission_rate(self):
-        return self.commission_percent / Decimal("100")
+    def taxa_comissao(self):
+        return self.porcentagem_comissao / Decimal("100")
 
-    def price_to_receive(self, net_amount):
-        price = (net_amount + self.fixed_fee) / (1 - self.commission_rate)
-        return price.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    def valor_venda(self, valor_liq):
+        preco = (valor_liq + self.taxa_fixa) / (1 - self.taxa_comissao)
+        return preco.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
     def __str__(self):
-        return self.name
+        return self.nome

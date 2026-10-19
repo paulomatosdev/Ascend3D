@@ -21,7 +21,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "apps.catalog",
     "apps.machines",
-    "apps.channels"
+    "apps.channels",
+    "apps.pricing"
 ]
 
 MIDDLEWARE = [
