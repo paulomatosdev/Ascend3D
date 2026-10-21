@@ -77,18 +77,18 @@ ascend/
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate      # Windows: .venv\Scripts\activate
-pip install django
-django-admin startproject config .
+source .venv/bin/activate      # Windows: .venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+cp .env.example .env           # Windows PowerShell: Copy-Item .env.example .env
+# Edite .env e substitua SECRET_KEY por uma chave local.
 python manage.py migrate
 python manage.py runserver
 ```
 
-Depois de criar o projeto, registre os apps em `INSTALLED_APPS` e rode as migrações a cada mudança nos modelos:
+Crie um usuário administrador quando quiser acessar o Django Admin:
 
 ```bash
-python manage.py makemigrations
-python manage.py migrate
+python manage.py createsuperuser
 ```
 
 ## Roadmap

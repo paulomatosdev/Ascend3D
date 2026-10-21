@@ -6,7 +6,7 @@ from django.db import models
 
 
 class Maquina(models.Model):
-    class Tipo_Impressao(models.TextChoices):
+    class TipoImpressao(models.TextChoices):
         FDM = "FDM", "FDM"
         RESINA = "RESINA", "Resina"
 
@@ -14,7 +14,7 @@ class Maquina(models.Model):
     tipo_impressao = models.CharField(
         "tipo de impressão",
         max_length=10,
-        choices=Tipo_Impressao.choices,
+        choices=TipoImpressao.choices,
     )
     preco_compra = models.DecimalField(
         "preço de compra (R$)",
@@ -68,9 +68,5 @@ class Maquina(models.Model):
         return (self.preco_compra - self.valor_revenda) / self.vida_util_horas
 
     @property
-    def machine_cost_per_hour(self):
-        return self.depreciacao_por_hora + self.manutencao_por_hora
-
-    @property
     def maquina_custo_por_hora(self):
-        return self.machine_cost_per_hour
+        return self.depreciacao_por_hora + self.manutencao_por_hora

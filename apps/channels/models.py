@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
-class Marketplaces(models.Model):
+class Marketplace(models.Model):
     nome = models.CharField(max_length=100, unique=True)
     porcentagem_comissao = models.DecimalField(
         max_digits=5,

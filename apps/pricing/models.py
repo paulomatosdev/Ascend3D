@@ -6,9 +6,11 @@ from django.db import models
 
 class PerfilPrecificacao(models.Model):
     nome = models.CharField("Nome", max_length=100, unique=True)
-    tarifa_Kwh = models.DecimalField(
-        "Tarifa KWh", max_digits=10, decimal_places=2,
-        validators=[MinValueValidator(Decimal("0.00"))],
+    tarifa_kwh = models.DecimalField(
+        "Tarifa KWh",
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.01"))],
     )
     valor_hora_trabalhada = models.DecimalField(
         "Valor Hora Trabalhada", max_digits=10, decimal_places=2,
@@ -35,3 +37,11 @@ class PerfilPrecificacao(models.Model):
 
     def __str__(self):
         return self.nome
+
+    @property
+    def taxa_falha(self):
+        return self.porcentagem_falha / Decimal("100")
+
+    @property
+    def markup_fracao(self):
+        return self.markup / Decimal("100")

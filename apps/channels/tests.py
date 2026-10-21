@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from .models import Marketplaces
+from .models import Marketplace
 
 
 class MarketplaceValidationTests(TestCase):
@@ -14,7 +14,7 @@ class MarketplaceValidationTests(TestCase):
             "taxa_fixa": Decimal("7.00"),
         }
         data.update(overrides)
-        return Marketplaces(**data)
+        return Marketplace(**data)
 
     def assert_invalid(self, marketplace, field):
         with self.assertRaises(ValidationError) as raised:
@@ -51,3 +51,36 @@ class MarketplaceValidationTests(TestCase):
     def test_sale_price_grosses_up_net_target(self):
         marketplace = self.make_marketplace(porcentagem_comissao=Decimal("10.00"), taxa_fixa=Decimal("2.00"))
         self.assertEqual(marketplace.valor_venda(Decimal("100.00")), Decimal("113.33"))
+
+    def test_sale_price_with_20_percent_commission_and_fixed_fee(self):
+        marketplace = self.make_marketplace(
+            porcentagem_comissao=Decimal("20.00"), taxa_fixa=Decimal("7.00")
+        )
+
+        self.assertEqual(marketplace.valor_venda(Decimal("93.00")), Decimal("125.00"))
+
+    def test_sale_price_with_14_percent_commission(self):
+        marketplace = self.make_marketplace()
+
+        self.assertEqual(marketplace.valor_venda(Decimal("57.14")), Decimal("74.58"))
+
+    def test_sale_price_half_cent_rounds_up(self):
+        marketplace = self.make_marketplace(
+            porcentagem_comissao=Decimal("20.00"), taxa_fixa=Decimal("7.00")
+        )
+
+        self.assertEqual(marketplace.valor_venda(Decimal("57.14")), Decimal("80.18"))
+
+    def test_sale_price_57_10_rounds_to_80_13(self):
+        marketplace = self.make_marketplace(
+            porcentagem_comissao=Decimal("20.00"), taxa_fixa=Decimal("7.00")
+        )
+
+        self.assertEqual(marketplace.valor_venda(Decimal("57.10")), Decimal("80.13"))
+
+    def test_direct_sale_returns_net_target(self):
+        marketplace = self.make_marketplace(
+            porcentagem_comissao=Decimal("0.00"), taxa_fixa=Decimal("0.00")
+        )
+
+        self.assertEqual(marketplace.valor_venda(Decimal("57.14")), Decimal("57.14"))

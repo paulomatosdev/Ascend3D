@@ -10,7 +10,7 @@ class MachineCostTests(TestCase):
     def setUp(self):
         self.maquinas = Maquina(
             nome="Impressora de teste",
-            tipo_impressao=Maquina.Tipo_Impressao.FDM,
+            tipo_impressao=Maquina.TipoImpressao.FDM,
             preco_compra=Decimal("3000.00"),
             valor_revenda=Decimal("600.00"),
             vida_util_horas=3000,
